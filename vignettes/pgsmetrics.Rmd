@@ -1,0 +1,126 @@
+---
+title: "Getting Started with pgsmetrics"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with pgsmetrics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(pgsmetrics)
+```
+
+## Example (binary trait)
+
+First, let's simulate some data:
+
+```{r simulate_data}
+n_simul <- 1e4
+df <- simulate_data(n = n_simul, n_pgs = 5)
+```
+
+Now, let's use the `pgsmetrics` function to fit models with different PGS and compute performance metrics.
+In this example, we'll use 5 PGS with varying degree of measurement error (TODO see `PGS simulation` vignette).
+We assume a binary variable (`y_bin`), adjust for `age`, and use 100 bootstrap replicates (TODO $>200$ or $>500$ recommended).
+
+```{r basic_usage}
+results <- pgsmetrics(
+  df,
+  pgs = paste0("pgs", 1:5),
+  dep = "y_bin",
+  covars = c("age"),
+  n_boot = 100,
+  n_cores = 4
+)
+```
+
+The metrics are stored under `results$metrics`.
+There are three different values for each PGS and each metric, one for a covariate-only model (no PGS, `cov`), one for a full model (`full`), and one for the difference between `full` and `cov` (incremental value, `full - cov`).
+
+```{r print_results}
+print(results, n = 1)
+```
+
+Let's plot the metrics
+
+```{r plot_results, fig.height=2.5}
+plot(results, model_type = "partial", ncol = 5)
+```
+
+In each bootstrap replication, we rank the PGS based on the metrics and compute confidence intervals.
+Let's plot the ranks.
+
+```{r plot_results_ranks, fig.height=2.5}
+plot(results, type = "ranks", ncol = 5)
+```
+
+Diff
+
+```{r plot_results_diff, fig.height=4}
+plot(results, type = "diff", ncol = 5)
+```
+
+## Example (continuous trait)
+
+```{r results_quant}
+results_quant <- pgsmetrics(
+  df,
+  pgs = paste0("pgs", 1:5),
+  dep = "y",
+  covars = c("age"),
+  n_boot = 100,
+  n_cores = 4
+)
+```
+
+The metrics are stored under `results_quant$metrics`
+
+```{r print_results_quant}
+print(results_quant, n = 1)
+```
+
+Let's plot the metrics
+
+```{r plot_results_quant, fig.height=2.5}
+plot(results_quant, ncol = 5)
+```
+
+Let's plot the ranks
+
+```{r plot_results_quant_ranks, fig.height=2.5}
+plot(results_quant, type = "ranks", ncol = 5)
+```
+
+Diff
+
+```{r plot_results_quant_diff, fig.height=4}
+plot(results_quant, type = "diff", ncol = 4)
+```
+
+## Calibration
+
+TODO text.
+
+```{r calibration_plots, fig.height=4}
+p_cal1 <- plot_calibration(df, pgs = "pgs1", dep = "y_bin")
+p_cal2 <- plot_calibration(df, pgs = "pgs1", dep = "y_bin", covars = c("age", "sex"))
+cowplot::plot_grid(p_cal1, p_cal2, nrow = 1)
+```
+
+## Net benefit / decision curves
+
+TODO text.
+
+```{r dcurve_plots, fig.height=4}
+p_dcurve1 <- plot_dcurve(df, pgs = "pgs1", dep = "y_bin")
+p_dcurve2 <- plot_dcurve(df, pgs = "pgs1", dep = "y_bin", covars = c("age", "sex"))
+cowplot::plot_grid(p_dcurve1, p_dcurve2, nrow = 1)
+```

@@ -1,0 +1,11 @@
+url: ~
+template:
+  bootstrap: 5
+  lightswitch: true
+articles:
+  - title: General
+    contents:
+      - pgsmetrics
+      - blb_bootstrap
+      - pgs_simulation
+      - adding_metrics

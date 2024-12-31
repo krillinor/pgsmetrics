@@ -1,0 +1,21 @@
+---
+title: "PGS simulation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{PGS simulation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(pgsmetrics)
+```
+
+TODO mention that use derivation from XXX et al

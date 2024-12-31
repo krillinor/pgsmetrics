@@ -1,0 +1,7 @@
+---
+title: PGS performance report
+---
+
+```{r}
+d <- simulate_data(n = 1e5)
+```

@@ -1,0 +1,179 @@
+---
+title: "BLB bootstrapping"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{BLB bootstrapping}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(pgsmetrics)
+```
+
+BLB bootstrapping, `boot_method="blb"` is handy when the number of people and PGS is large. However, the results may not be the same as when using the standard bootstrap, `boot_method="standard"`.
+
+```{r simulation}
+df <- simulate_data(n = 1e4, n_pgs = 10)
+```
+
+## Example, binary trait
+
+```{r standard_vs_blb_binary}
+results_standard <- pgsmetrics(
+  df,
+  pgs = paste0("pgs", 1:10),
+  dep = "y_bin",
+  covars = c("age"),
+  n_boot = 100,
+  n_cores = 4
+)
+
+results_blb <- pgsmetrics(
+  boot_method = "blb",
+  data = df,
+  pgs = paste0("pgs", 1:10),
+  dep = "y_bin",
+  covars = c("age"),
+  n_cores = 4
+)
+```
+
+Compare metrics
+
+```{r comparison_metrics_binary}
+library(ggplot2)
+
+met <- "metrics"
+comp1 <- results_standard[[met]]
+comp2 <- results_blb[[met]]
+comp1$boot_method <- "standard"
+comp2$boot_method <- "blb"
+comp <- rbindlist(list(comp1, comp2))
+ggplot(
+  comp[type == "partial", ],
+  aes(y = pgs, x = observed, xmin = ci_lower, xmax = ci_upper, color = boot_method)
+) +
+  geom_pointrange(size = 1 / 5, position = position_dodge(width = 1 / 2)) +
+  facet_wrap(~metric, scales = "free_x", ncol = 5) +
+  theme_classic()
+```
+
+Compare ranks
+
+```{r comparison_ranks_binary}
+met <- "ranks"
+comp1 <- results_standard[[met]]
+comp2 <- results_blb[[met]]
+comp1$boot_method <- "standard"
+comp2$boot_method <- "blb"
+comp <- rbindlist(list(comp1, comp2))
+ggplot(
+  comp[type == "partial", ],
+  aes(y = pgs, x = observed, xmin = ci_lower, xmax = ci_upper, color = boot_method)
+) +
+  geom_pointrange(size = 1 / 5, position = position_dodge(width = 1 / 2)) +
+  facet_wrap(~metric, scales = "free_x", ncol = 5) +
+  theme_classic()
+```
+
+Compare diff
+
+```{r comparison_diff_binary}
+comp1 <- results_standard$diff
+comp2 <- results_blb$diff
+comp1$boot_method <- "standard"
+comp2$boot_method <- "blb"
+comp <- rbindlist(list(comp1, comp2))
+ggplot(
+  comp,
+  aes(y = pgs1_pgs2, x = observed, xmin = ci_lower, xmax = ci_upper, color = boot_method)
+) +
+  geom_pointrange(size = 1 / 5, position = position_dodge(width = 1 / 2)) +
+  facet_wrap(~metric, scales = "free_x", ncol = 5) +
+  theme_classic()
+```
+
+## Example, continuous trait
+
+```{r standard_vs_blb}
+results_standard <- pgsmetrics(
+  df,
+  pgs = paste0("pgs", 1:10),
+  dep = "y",
+  covars = c("age"),
+  n_boot = 100,
+  n_cores = 4
+)
+
+results_blb <- pgsmetrics(
+  boot_method = "blb",
+  data = df,
+  pgs = paste0("pgs", 1:10),
+  dep = "y",
+  covars = c("age"),
+  n_cores = 4
+)
+```
+
+Compare metrics
+
+```{r comparison_metrics}
+library(ggplot2)
+
+met <- "metrics"
+comp1 <- results_standard[[met]]
+comp2 <- results_blb[[met]]
+comp1$boot_method <- "standard"
+comp2$boot_method <- "blb"
+comp <- rbindlist(list(comp1, comp2))
+ggplot(
+  comp[type == "partial", ],
+  aes(y = pgs, x = observed, xmin = ci_lower, xmax = ci_upper, color = boot_method)
+) +
+  geom_pointrange(size = 1 / 5, position = position_dodge(width = 1 / 2)) +
+  facet_wrap(~metric, scales = "free_x", ncol = 5) +
+  theme_classic()
+```
+
+Compare ranks
+
+```{r comparison_ranks}
+met <- "ranks"
+comp1 <- results_standard[[met]]
+comp2 <- results_blb[[met]]
+comp1$boot_method <- "standard"
+comp2$boot_method <- "blb"
+comp <- rbindlist(list(comp1, comp2))
+ggplot(
+  comp[type == "partial", ],
+  aes(y = pgs, x = observed, xmin = ci_lower, xmax = ci_upper, color = boot_method)
+) +
+  geom_pointrange(size = 1 / 5, position = position_dodge(width = 1 / 2)) +
+  facet_wrap(~metric, scales = "free_x", ncol = 5) +
+  theme_classic()
+```
+
+Compare diff
+
+```{r comparison_diff}
+comp1 <- results_standard$diff
+comp2 <- results_blb$diff
+comp1$boot_method <- "standard"
+comp2$boot_method <- "blb"
+comp <- rbindlist(list(comp1, comp2))
+ggplot(
+  comp,
+  aes(y = pgs1_pgs2, x = observed, xmin = ci_lower, xmax = ci_upper, color = boot_method)
+) +
+  geom_pointrange(size = 1 / 5, position = position_dodge(width = 1 / 2)) +
+  facet_wrap(~metric, scales = "free_x", ncol = 5) +
+  theme_classic()
+```
