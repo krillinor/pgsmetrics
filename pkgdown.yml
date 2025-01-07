@@ -1,0 +1,9 @@
+pandoc: 3.1.11
+pkgdown: 2.1.1
+pkgdown_sha: ~
+articles:
+  adding_metrics: adding_metrics.html
+  blb_bootstrap: blb_bootstrap.html
+  pgs_simulation: pgs_simulation.html
+  pgsmetrics: pgsmetrics.html
+last_built: 2025-01-07T14:45Z
